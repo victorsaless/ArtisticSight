@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,6 +13,8 @@ import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import Global from "./style";
 import video from "../../../assets/foto.mp4";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import firebaseConfig from "../../../config/config";
 
 function Copyright(props: any) {
   return (
@@ -36,6 +38,11 @@ function Copyright(props: any) {
 }
 
 function SignIn() {
+  const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
+  const [user, setDocs] = useState<
+    Array<{ id: string; nome: string; email: string }>
+  >([]);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -45,10 +52,36 @@ function SignIn() {
     });
   };
 
+  const db = getFirestore(firebaseConfig);
+  const useCollectionRef = collection(db, "users");
+  useEffect(() => {
+    const getUser = async () => {
+      const data = await getDocs(useCollectionRef);
+      const findUser = data.docs.map((doc) => ({
+        id: doc.id,
+        nome: doc.data().nome,
+        email: doc.data().email,
+      }));
+      console.log(data);
+      setDocs(findUser);
+    };
+    getUser();
+  }, []);
+
   return (
     <ThemeProvider theme={Global}>
-      <Container component="main" maxWidth="xs">
+      <Container
+        style={{ background: "#000000c1", borderRadius: "25px" }}
+        component="main"
+        maxWidth="xs"
+      >
         <CssBaseline />
+        {user.map((user) => (
+          <div key={user.id}>
+            {user.nome} <br />
+            {user.email}
+          </div>
+        ))}
         <Box
           sx={{
             marginTop: 8,
@@ -57,7 +90,7 @@ function SignIn() {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}></Avatar>
+          <Avatar sx={{ m: 1, bgcolor: "customColor1.main" }}></Avatar>
           <Typography component="h1" variant="h5">
             ArtisticSight
           </Typography>
