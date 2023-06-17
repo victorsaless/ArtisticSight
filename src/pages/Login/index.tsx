@@ -5,37 +5,15 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { ThemeProvider } from "@mui/material/styles";
 import Global from "./style";
-import video from "../../../assets/foto.mp4";
+import video from "../../assets/foto.mp4";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
-import firebaseConfig from "../../../config/config";
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link
-        color="inherit"
-        href="https://www.google.com/url?sa=t&source=web&rct=j&url=https://www.instagram.com/soupoesiaworld/&ved=2ahUKEwjs4ruGrsP_AhUdqpUCHe2QAEoQFnoECA4QAQ&usg=AOvVaw2AgWKuzy_XYfMyu_x2pY1g"
-      >
-        ArtisticSight
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import firebaseConfig from "../../config/config";
+import Copyright from "../../components/footer/footer";
 
 function SignIn() {
   const [email, setEmail] = useState("");
@@ -43,6 +21,7 @@ function SignIn() {
   const [user, setDocs] = useState<
     Array<{ id: string; nome: string; email: string }>
   >([]);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -53,7 +32,9 @@ function SignIn() {
   };
 
   const db = getFirestore(firebaseConfig);
+
   const useCollectionRef = collection(db, "users");
+  
   useEffect(() => {
     const getUser = async () => {
       const data = await getDocs(useCollectionRef);
@@ -76,12 +57,7 @@ function SignIn() {
         maxWidth="xs"
       >
         <CssBaseline />
-        {user.map((user) => (
-          <div key={user.id}>
-            {user.nome} <br />
-            {user.email}
-          </div>
-        ))}
+
         <Box
           sx={{
             marginTop: 8,
@@ -132,18 +108,6 @@ function SignIn() {
             >
               Entrar
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2" color="secondary">
-                  Esqueci minha senha!
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2" color="secondary">
-                  {"Não possuo uma conta? Cadastre-se"}
-                </Link>
-              </Grid>
-            </Grid>
           </Box>
         </Box>
         <Box
@@ -169,7 +133,7 @@ function SignIn() {
             muted
           />
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
+        <Copyright style={{ color: "white" }} sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
   );
