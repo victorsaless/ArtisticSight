@@ -1,28 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { addDoc, collection, getDocs, getFirestore } from "firebase/firestore";
 import { ThemeProvider } from "@mui/material/styles";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Copyright from "../../components/footer/footer";
 import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
 import Container from "@mui/material/Container";
-import Checkbox from "@mui/material/Checkbox";
-import video from "../../assets/foto.mp4";
-import Avatar from "@mui/material/Avatar";
+import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Global from "./style";
+import firebaseConfig from "../../config/config";
+import NavBar from "../../components/NavBar";
+import video from "../../assets/foto.mp4";
+import Avatar from "@mui/material/Avatar";
 
 export default function SignUp() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [password, setPassword] = useState("");
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+  });
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
+
+    if (!email || !firstName || !lastName || !password) {
+      setFormErrors({
+        email: email ? "" : "Campo obrigatório",
+        firstName: firstName ? "" : "Campo obrigatório",
+        lastName: lastName ? "" : "Campo obrigatório",
+        password: password ? "" : "Campo obrigatório",
+      });
+      return;
+    }
+
+    // Validar formato de email usando regex
+    const emailRegex = /^[\w-/.]+@([\w-]+\.)+[\w-]{2,}$/;
+    if (!emailRegex.test(email)) {
+      setFormErrors({
+        ...formErrors,
+        email: "Email inválido",
+      });
+      return;
+    }
+
+    // Enviar dados para o Firebase ou qualquer outra ação necessária
+    const db = getFirestore(firebaseConfig);
+    const useCollectionRef = collection(db, "users");
+    const User = await addDoc(useCollectionRef, {
+      email,
+      lastName,
+      firstName,
+      password,
     });
+    return User;
   };
 
   return (
@@ -58,7 +94,7 @@ export default function SignUp() {
         >
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}></Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            ArtisticSight
           </Typography>
           <Box
             component="form"
@@ -74,8 +110,12 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="firstName"
-                  label="First Name"
+                  label="Primeiro Nome"
                   autoFocus
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  error={!!formErrors.firstName}
+                  helperText={formErrors.firstName}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -83,9 +123,13 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
+                  label="Segundo Nome"
                   name="lastName"
                   autoComplete="family-name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  error={!!formErrors.lastName}
+                  helperText={formErrors.lastName}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -93,9 +137,13 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="Endereço de E-mail"
                   name="email"
                   autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  error={!!formErrors.email}
+                  helperText={formErrors.email}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -103,10 +151,14 @@ export default function SignUp() {
                   required
                   fullWidth
                   name="password"
-                  label="Password"
+                  label="Senha"
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  error={!!formErrors.password}
+                  helperText={formErrors.password}
                 />
               </Grid>
             </Grid>
@@ -116,11 +168,11 @@ export default function SignUp() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              Cadastrar
             </Button>
+            <NavBar />
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );

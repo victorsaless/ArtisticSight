@@ -1,9 +1,31 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import User from "./domain/User";
+import Register from "./pages/Register";
+import QuatroZeroQuatro from "./routes/errorPages";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import App from "./App";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <QuatroZeroQuatro />,
+    children: [
+      {
+        path: "/ArtisticSight",
+        element: <User />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+    ],
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );

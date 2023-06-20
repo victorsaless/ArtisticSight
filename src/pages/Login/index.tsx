@@ -1,53 +1,79 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  query,
+  where,
+} from "firebase/firestore";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Container from "@mui/material/Container";
+import Checkbox from "@mui/material/Checkbox";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import { ThemeProvider } from "@mui/material/styles";
-import Global from "./style";
+import NavBar from "../../components/NavBar";
 import video from "../../assets/foto.mp4";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import Global from "./style";
 import firebaseConfig from "../../config/config";
-import Copyright from "../../components/footer/footer";
 
 function SignIn() {
-  const [email, setEmail] = useState("");
-  const [nome, setNome] = useState("");
-  const [user, setDocs] = useState<
-    Array<{ id: string; nome: string; email: string }>
-  >([]);
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-  };
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   const db = getFirestore(firebaseConfig);
-
   const useCollectionRef = collection(db, "users");
-  
-  useEffect(() => {
-    const getUser = async () => {
-      const data = await getDocs(useCollectionRef);
-      const findUser = data.docs.map((doc) => ({
-        id: doc.id,
-        nome: doc.data().nome,
-        email: doc.data().email,
-      }));
-      console.log(data);
-      setDocs(findUser);
-    };
-    getUser();
-  }, []);
+
+  const getUser = async (email: string, password: string) => {
+    const querys = query(
+      useCollectionRef,
+      where("email", "==", email),
+      where("password", "==", password)
+    );
+
+    const data = await getDocs(querys);
+    if (data.empty) {
+      console.log("Usuário não encontrado", "1111111");
+      return null;
+    } else {
+      const user = data.docs[0].data();
+      console.log("Usuário encontrado:", "222222");
+      return user;
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setFormErrors({
+        email: email ? "" : "Campo obrigatório",
+        password: password ? "" : "Campo obrigatório",
+      });
+      return;
+    }
+
+    const emailRegex = /^[\w-/.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if (!emailRegex.test(email)) {
+      console.log("Por favor, insira um email válido", "333333");
+      return;
+    }
+
+    const user = await getUser(email, password);
+
+    if (user) {
+      console.log("Login bem-sucedido!", "444444");
+    } else {
+      console.log("Login inválido!", "5555");
+    }
+  };
 
   return (
     <ThemeProvider theme={Global}>
@@ -57,7 +83,6 @@ function SignIn() {
         maxWidth="xs"
       >
         <CssBaseline />
-
         <Box
           sx={{
             marginTop: 8,
@@ -66,7 +91,7 @@ function SignIn() {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "customColor1.main" }}></Avatar>
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}></Avatar>
           <Typography component="h1" variant="h5">
             ArtisticSight
           </Typography>
@@ -85,6 +110,8 @@ function SignIn() {
               name="email"
               autoComplete="email"
               autoFocus
+              error={!!formErrors.email}
+              helperText={formErrors.email}
             />
             <TextField
               margin="normal"
@@ -95,6 +122,8 @@ function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
+              error={!!formErrors.password}
+              helperText={formErrors.password}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -133,7 +162,7 @@ function SignIn() {
             muted
           />
         </Box>
-        <Copyright style={{ color: "white" }} sx={{ mt: 8, mb: 4 }} />
+        <NavBar />
       </Container>
     </ThemeProvider>
   );
