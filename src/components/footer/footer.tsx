@@ -19,6 +19,7 @@ function Copyright(props: any) {
       {new Date().getFullYear()}
       {"."}
     </Typography>
+    
   );
 }
 
