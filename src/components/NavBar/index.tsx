@@ -9,7 +9,7 @@ function NavBar() {
       <ul>
         <p>
           <Link style={{ color: "white" }} to="/ArtisticSight">
-            Esqueci minha senha!
+            Ja possuo uma conta!
           </Link>
         </p>
         <i style={{ color: "#000000c1" }}>{"."}</i>

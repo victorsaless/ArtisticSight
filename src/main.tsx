@@ -5,6 +5,7 @@ import QuatroZeroQuatro from "./routes/errorPages";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import Dashboard from "./pages/dasboard/index";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register />,
+      },
+      {
+        path: "/Dashboard",
+        element: <Dashboard />,
       },
     ],
   },

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   collection,
   getDocs,
@@ -16,6 +17,8 @@ import Checkbox from "@mui/material/Checkbox";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import NavBar from "../../components/NavBar";
 import video from "../../assets/foto.mp4";
 import Global from "./style";
@@ -23,6 +26,8 @@ import firebaseConfig from "../../config/config";
 
 function SignIn() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const db = getFirestore(firebaseConfig);
   const useCollectionRef = collection(db, "users");
@@ -69,10 +74,15 @@ function SignIn() {
     const user = await getUser(email, password);
 
     if (user) {
-      console.log("Login bem-sucedido!", "444444");
+      window.alert("Login bem-sucedido!");
+      navigate("/Dashboard");
     } else {
-      console.log("Login inválido!", "5555");
+      window.alert("Login inválido!");
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
   return (
@@ -119,11 +129,22 @@ function SignIn() {
               fullWidth
               name="password"
               label="Senha"
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="current-password"
               error={!!formErrors.password}
               helperText={formErrors.password}
+              InputProps={{
+                endAdornment: (
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

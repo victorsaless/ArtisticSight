@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { addDoc, collection, getDocs, getFirestore } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
+import {
+  addDoc,
+  collection,
+  getDocs,
+  getFirestore,
+  query,
+  where,
+} from "firebase/firestore";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
@@ -14,7 +23,7 @@ import NavBar from "../../components/NavBar";
 import video from "../../assets/foto.mp4";
 import Avatar from "@mui/material/Avatar";
 
-export default function SignUp() {
+function SignUp() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -25,7 +34,7 @@ export default function SignUp() {
     lastName: "",
     password: "",
   });
-
+  const navigate = useNavigate();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -49,15 +58,30 @@ export default function SignUp() {
       return;
     }
 
-    // Enviar dados para o Firebase ou qualquer outra ação necessária
+    // Verificar se o usuário já existe no banco de dados
     const db = getFirestore(firebaseConfig);
-    const useCollectionRef = collection(db, "users");
-    const User = await addDoc(useCollectionRef, {
+    const usersCollectionRef = collection(db, "users");
+    const querySnapshot = await getDocs(
+      query(usersCollectionRef, where("email", "==", email))
+    );
+
+    if (!querySnapshot.empty) {
+      setFormErrors({
+        ...formErrors,
+        email: "Email já cadastrado",
+      });
+      return;
+    }
+
+    // Enviar dados para o Firebase ou qualquer outra ação necessária
+    const User = await addDoc(usersCollectionRef, {
       email,
       lastName,
       firstName,
       password,
     });
+
+    navigate("/ArtisticSight");
     return User;
   };
 
@@ -177,3 +201,4 @@ export default function SignUp() {
     </ThemeProvider>
   );
 }
+export default SignUp;
